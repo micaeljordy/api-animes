@@ -50,7 +50,7 @@ namespace Animes.Application.Services
                 {
                     diretor = await _diretorRepository.CreateDiretor(new Diretor
                     {
-                        Nome = createAnimeRequest.Nome.Trim()
+                        Nome = createAnimeRequest.Diretor.Trim()
                     });
                 }
                 var anime = new Anime
