@@ -4,9 +4,9 @@ namespace Animes.Domain.Entities
     {
         public int Id { get; set; }
         public string Nome { get; set; } = null!;
-        public string Resumo { get; set; } = null!;
+        public string? Resumo { get; set; }
         public bool StatusExcluido { get; set; }
         public int IdDiretor {get; set;}
-        public Diretor DiretorNavigation {get; set;} = null!;
+        public virtual Diretor DiretorNavigation {get; set;} = null!;
     }
 }

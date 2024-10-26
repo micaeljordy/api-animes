@@ -4,6 +4,6 @@ namespace Animes.Domain.Entities
     {
         public int Id { get; set; }
         public string Nome { get; set; } = null!;
-        public ICollection<Anime> AnimesNavigations {get; set;} = new List<Anime>();
+        public virtual ICollection<Anime> AnimesNavigations {get; set;} = new List<Anime>();
     }
 }
