@@ -17,7 +17,9 @@ namespace Animes.Infra.Data.Repositories
 
         public async Task<Anime?> GetAnime(int id)
         {
-            return await _context.Animes.FindAsync(id);
+            return await _context.Animes
+                        .Include(p=>p.DiretorNavigation)
+                        .FirstOrDefaultAsync(p=>p.Id == id && !p.StatusExcluido);
         }
 
         public async Task<Anime> CreateAnime(Anime anime)
@@ -29,7 +31,8 @@ namespace Animes.Infra.Data.Repositories
 
         public async Task<bool> DeleteAnime(int id)
         {
-            var anime = await _context.Animes.FirstOrDefaultAsync(p=>p.Id == id);
+            var anime = await _context.Animes
+                        .FirstOrDefaultAsync(p=>p.Id == id && !p.StatusExcluido);
             if(anime == null) return false;
             anime.StatusExcluido = true;
             _context.Animes.Update(anime);
@@ -39,7 +42,7 @@ namespace Animes.Infra.Data.Repositories
 
         public async Task<ICollection<Anime>> GetAnimes(int skip, int take, string? criteria)
         {
-            var query = _context.Animes.AsQueryable();
+            var query = _context.Animes.Where(p=>!p.StatusExcluido).AsQueryable();
 
             if (!string.IsNullOrEmpty(criteria))
             {

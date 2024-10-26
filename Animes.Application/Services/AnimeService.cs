@@ -1,5 +1,6 @@
 using Animes.Application.DTOs.Requests;
 using Animes.Application.DTOs.Responses;
+using Animes.Application.Exceptions;
 using Animes.Application.Interfaces;
 using Animes.Application.ViewModels;
 using Animes.Domain.Entities;
@@ -15,6 +16,29 @@ namespace Animes.Application.Services
         {
             _animeRepository = animeRepository;
             _diretorRepository = diretorRepository;
+        }
+
+        public async Task<AnimeResponseDTO?> GetAnime(int id)
+        {
+            try
+            {
+                var anime = await _animeRepository.GetAnime(id);
+                if(anime == null)
+                {
+                    return null;
+                }
+                return new AnimeResponseDTO
+                {
+                    Id = anime.Id,
+                    Nome = anime.Nome,
+                    Resumo = anime.Resumo,
+                    Diretor = anime.DiretorNavigation.Nome
+                };
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<AnimeResponseDTO> CreateAnime(CreateAnimeRequest createAnimeRequest)
@@ -55,7 +79,12 @@ namespace Animes.Application.Services
         {
             try
             {
-                return await _animeRepository.DeleteAnime(id);
+                var success = await _animeRepository.DeleteAnime(id);
+                if(!success)
+                {
+                    throw new NotFoundException("Anime não encontrado!");
+                }
+                return success;
             }
             catch
             {
@@ -116,7 +145,7 @@ namespace Animes.Application.Services
                 var anime = await _animeRepository.GetAnime(id);
                 if (anime == null)
                 {
-                    return false;
+                    throw new NotFoundException("Anime não encontrado!");
                 }
                 anime.Nome = updateAnimeRequest.Nome?.Trim() ?? anime.Nome;
                 anime.Resumo = updateAnimeRequest.Resumo?.Trim() ?? anime.Resumo;

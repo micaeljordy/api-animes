@@ -48,7 +48,7 @@ namespace Animes.Infra.Data.Migrations
 
                     b.HasIndex("IdDiretor");
 
-                    b.ToTable("Animes");
+                    b.ToTable("Animes", (string)null);
                 });
 
             modelBuilder.Entity("Animes.Domain.Entities.Diretor", b =>
@@ -66,7 +66,7 @@ namespace Animes.Infra.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Diretores");
+                    b.ToTable("Diretores", (string)null);
                 });
 
             modelBuilder.Entity("Animes.Domain.Entities.Anime", b =>
