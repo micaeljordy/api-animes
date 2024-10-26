@@ -14,11 +14,13 @@ namespace Animes.Infra.Data.Context
         }
         public DbSet<Anime> Animes { get; set; }
         public DbSet<Diretor> Diretores { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new AnimesMap());
             modelBuilder.ApplyConfiguration(new DiretoresMap());
+            modelBuilder.ApplyConfiguration(new UsuarioMap());
 
             base.OnModelCreating(modelBuilder);
         }
