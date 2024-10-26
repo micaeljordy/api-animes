@@ -154,6 +154,10 @@ namespace Animes.Application.Services
                 anime.Resumo = updateAnimeRequest.Resumo?.Trim() ?? anime.Resumo;
                 return await _animeRepository.UpdateAnime(anime);
             }
+            catch(NotFoundException)
+            {
+                return false;
+            }
             catch
             {
                 throw;
