@@ -19,7 +19,7 @@ namespace Animes.Infra.Data.Repositories
         {
             return await _context.Animes.FindAsync(id);
         }
-        
+
         public async Task<Anime> CreateAnime(Anime anime)
         {
             await _context.Animes.AddAsync(anime);
@@ -37,7 +37,7 @@ namespace Animes.Infra.Data.Repositories
             return true;
         }
 
-        public async Task<IEnumerable<Anime>> GetAnimes(int skip, int take, string? criteria)
+        public async Task<ICollection<Anime>> GetAnimes(int skip, int take, string? criteria)
         {
             var query = _context.Animes.AsQueryable();
 

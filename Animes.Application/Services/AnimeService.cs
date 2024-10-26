@@ -22,7 +22,7 @@ namespace Animes.Application.Services
             try
             {
                 var diretor = await _diretorRepository.GetDiretor(createAnimeRequest.Diretor.Trim());
-                if(diretor == null)
+                if (diretor == null)
                 {
                     diretor = await _diretorRepository.CreateDiretor(new Diretor
                     {
@@ -63,9 +63,50 @@ namespace Animes.Application.Services
             }
         }
 
-        public Task<AnimeViewModel> GetAnimes(int? index, int? take, FilterAnimeRequest? filterAnimeRequest)
+        public async Task<AnimeViewModel> GetAnimes(int? index, int? take, FilterAnimeRequest? filterAnimeRequest)
         {
-            throw new NotImplementedException();
+            try
+            {
+                int skip = 0;
+                if (!take.HasValue)
+                {
+                    take = int.MaxValue;
+                }
+                else
+                {
+                    if (take.Value < int.MaxValue)
+                    {
+                        if (index.HasValue)
+                        {
+                            skip = take.Value * index.Value;
+                        }
+                    }
+                }
+
+                string criteria = string.Empty;
+                if (filterAnimeRequest != null)
+                {
+                    if (!string.IsNullOrEmpty(filterAnimeRequest.Nome))
+                    {
+                        criteria = $"Nome.ToUpper().Contains(\"{filterAnimeRequest.Nome.Trim().ToUpper()}\")";
+                    }
+                    if (!string.IsNullOrEmpty(filterAnimeRequest.Resumo))
+                    {
+                        if (!string.IsNullOrEmpty(criteria)) criteria += " && ";
+                        criteria += $"Resumo.ToUpper().Contains(\"{filterAnimeRequest.Resumo.Trim().ToUpper()}\")";
+                    }
+                    if (!string.IsNullOrEmpty(filterAnimeRequest.Diretor))
+                    {
+                        if (!string.IsNullOrEmpty(criteria)) criteria += " && ";
+                        criteria += $"Diretor.ToUpper().Contains(\"{filterAnimeRequest.Diretor.Trim().ToUpper()}\")";
+                    }
+                }
+                return new AnimeViewModel(await _animeRepository.GetAnimes(skip, take.Value, criteria));
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<bool> UpdateAnime(int id, UpdateAnimeRequest updateAnimeRequest)
@@ -73,12 +114,12 @@ namespace Animes.Application.Services
             try
             {
                 var anime = await _animeRepository.GetAnime(id);
-                if(anime == null)
+                if (anime == null)
                 {
                     return false;
                 }
-                anime.Nome = updateAnimeRequest.Nome?.Trim()?? anime.Nome;
-                anime.Resumo = updateAnimeRequest.Resumo?.Trim()?? anime.Resumo;
+                anime.Nome = updateAnimeRequest.Nome?.Trim() ?? anime.Nome;
+                anime.Resumo = updateAnimeRequest.Resumo?.Trim() ?? anime.Resumo;
                 return await _animeRepository.UpdateAnime(anime);
             }
             catch
