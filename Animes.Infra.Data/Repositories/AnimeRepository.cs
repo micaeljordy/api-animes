@@ -2,7 +2,7 @@ using Animes.Domain.Entities;
 using Animes.Domain.Interfaces;
 using Animes.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic;
+using System.Linq.Dynamic.Core;
 
 
 namespace Animes.Infra.Data.Repositories
@@ -42,16 +42,20 @@ namespace Animes.Infra.Data.Repositories
 
         public async Task<ICollection<Anime>> GetAnimes(int skip, int take, string? criteria)
         {
-            var query = _context.Animes.Where(p=>!p.StatusExcluido).AsQueryable();
+            var query = _context.Animes
+            .Include(p => p.DiretorNavigation)
+            .Where(p=>!p.StatusExcluido).AsQueryable();
 
             if (!string.IsNullOrEmpty(criteria))
             {
-                query = query.Where(criteria);
+                query = query
+                .Where(criteria);
             }
 
             return await query
-                        .Include(p => p.DiretorNavigation)
                         .AsNoTracking()
+                        .Skip(skip)
+                        .Take(take)
                         .ToListAsync();
 
         }

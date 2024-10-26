@@ -23,7 +23,7 @@ namespace Animes.Application.Services
             try
             {
                 var anime = await _animeRepository.GetAnime(id);
-                if(anime == null)
+                if (anime == null)
                 {
                     return null;
                 }
@@ -80,7 +80,7 @@ namespace Animes.Application.Services
             try
             {
                 var success = await _animeRepository.DeleteAnime(id);
-                if(!success)
+                if (!success)
                 {
                     throw new NotFoundException("Anime não encontrado!");
                 }
@@ -103,34 +103,37 @@ namespace Animes.Application.Services
                 }
                 else
                 {
-                    if (take.Value < int.MaxValue)
+                    if (take.Value < int.MaxValue && index.HasValue)
                     {
-                        if (index.HasValue)
-                        {
-                            skip = take.Value * index.Value;
-                        }
+                        skip = take.Value * index.Value;
                     }
                 }
 
                 string criteria = string.Empty;
                 if (filterAnimeRequest != null)
                 {
+                    // Monta os critérios de forma segura
                     if (!string.IsNullOrEmpty(filterAnimeRequest.Nome))
                     {
-                        criteria = $"Nome.ToUpper().Contains(\"{filterAnimeRequest.Nome.Trim().ToUpper()}\")";
+                        criteria = $"Nome.ToLower().Contains(\"{filterAnimeRequest.Nome.Trim().ToLower()}\")";
                     }
                     if (!string.IsNullOrEmpty(filterAnimeRequest.Resumo))
                     {
                         if (!string.IsNullOrEmpty(criteria)) criteria += " && ";
-                        criteria += $"Resumo.ToUpper().Contains(\"{filterAnimeRequest.Resumo.Trim().ToUpper()}\")";
+                        criteria += $"Resumo.ToLower().Contains(\"{filterAnimeRequest.Resumo.Trim().ToLower()}\")";
                     }
                     if (!string.IsNullOrEmpty(filterAnimeRequest.Diretor))
                     {
                         if (!string.IsNullOrEmpty(criteria)) criteria += " && ";
-                        criteria += $"Diretor.ToUpper().Contains(\"{filterAnimeRequest.Diretor.Trim().ToUpper()}\")";
+                        criteria += $"DiretorNavigation.Nome.ToLower().Contains(\"{filterAnimeRequest.Diretor.Trim().ToLower()}\")";
                     }
                 }
-                return new AnimeViewModel(await _animeRepository.GetAnimes(skip, take.Value, criteria));
+
+                // Chama o repositório com o critério
+                var animes = await _animeRepository.GetAnimes(skip, take.Value, criteria);
+
+                // Retorna a ViewModel com os dados
+                return new AnimeViewModel(animes);
             }
             catch
             {
