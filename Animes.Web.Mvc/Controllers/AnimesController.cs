@@ -2,12 +2,14 @@ using Animes.Application.DTOs.Requests;
 using Animes.Application.DTOs.Responses;
 using Animes.Application.Interfaces;
 using Animes.Application.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Animes.Web.Mvc.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class AnimesController : ControllerBase
     {
         private readonly IAnimeService _animeService;
