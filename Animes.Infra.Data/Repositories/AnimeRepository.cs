@@ -54,6 +54,7 @@ namespace Animes.Infra.Data.Repositories
 
             return await query
                         .AsNoTracking()
+                        .OrderBy(p=>p.Id)
                         .Skip(skip)
                         .Take(take)
                         .ToListAsync();

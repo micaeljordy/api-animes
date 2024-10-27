@@ -5,6 +5,7 @@ using Animes.Application.Interfaces;
 using Animes.Application.ViewModels;
 using Animes.Domain.Entities;
 using Animes.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Animes.Application.Services
 {
@@ -12,10 +13,12 @@ namespace Animes.Application.Services
     {
         private readonly IAnimeRepository _animeRepository;
         private readonly IDiretorRepository _diretorRepository;
-        public AnimeService(IAnimeRepository animeRepository, IDiretorRepository diretorRepository)
+        private readonly ILogger<AnimeService> _logger;
+        public AnimeService(IAnimeRepository animeRepository, IDiretorRepository diretorRepository, ILogger<AnimeService> logger)
         {
             _animeRepository = animeRepository;
             _diretorRepository = diretorRepository;
+            _logger = logger;
         }
 
         public async Task<AnimeResponseDTO?> GetAnime(int id)
@@ -35,8 +38,9 @@ namespace Animes.Application.Services
                     Diretor = anime.DiretorNavigation.Nome
                 };
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.LogError(ex, "Erro ao buscar o registro de {Entity} com o ID: {Id}.", "Anime", id);
                 throw;
             }
         }
@@ -69,8 +73,9 @@ namespace Animes.Application.Services
                     Diretor = diretor.Nome
                 };
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.LogError(ex, "Erro ao criar o registro de {Entity} com os dados: {Data}.", "Anime", createAnimeRequest);
                 throw;
             }
         }
@@ -86,8 +91,13 @@ namespace Animes.Application.Services
                 }
                 return success;
             }
-            catch
+            catch(NotFoundException)
             {
+                return false;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao excluir o registro de {Entity} com o ID: {Id}.", "Anime", id);
                 throw;
             }
         }
@@ -135,8 +145,9 @@ namespace Animes.Application.Services
                 // Retorna a ViewModel com os dados
                 return new AnimeViewModel(animes);
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.LogError(ex, "Erro ao buscar os registros de {Entity} com os dados: {Data}.", "Anime", filterAnimeRequest);
                 throw;
             }
         }
@@ -158,8 +169,9 @@ namespace Animes.Application.Services
             {
                 return false;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao atualizar o registro de {Entity} com o ID: {Id}. Dados novos: {NewData}.", "Anime", id, updateAnimeRequest);
                 throw;
             }
         }

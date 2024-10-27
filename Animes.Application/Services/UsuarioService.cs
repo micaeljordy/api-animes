@@ -5,6 +5,7 @@ using Animes.Application.Exceptions;
 using Animes.Application.Interfaces;
 using Animes.Domain.Entities;
 using Animes.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Animes.Application.Services
 {
@@ -12,16 +13,18 @@ namespace Animes.Application.Services
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IEncryptionService _encryptionService;
+        private readonly ILogger<UsuarioService> _logger;
         private static readonly Random random = new Random();
-        public UsuarioService(IUsuarioRepository usuarioRepository, IEncryptionService encryptionService)
+        public UsuarioService(IUsuarioRepository usuarioRepository, IEncryptionService encryptionService, ILogger<UsuarioService> logger)
         {
             _usuarioRepository = usuarioRepository;
             _encryptionService = encryptionService;
+            _logger = logger;
         }
         private string GenerateRandomString()
         {
             int length = random.Next(1, 10);
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
             StringBuilder stringBuilder = new StringBuilder();
 
             for (int i = 0; i < length; i++)
@@ -47,7 +50,7 @@ namespace Animes.Application.Services
                 }
                 if (nomesSplit.First().Length > 48)
                 {
-                    throw new BusinessRulesException("Não é possível criar um UserName válido, tente cadastrar outro Nome.");
+                    throw new BusinessRulesException("Não é possível criar um UserName válido, tente abreviar.");
                 }
                 var username = nomesSplit.First() + '.' + nomesSplit.Last();
                 while (username.Length > 50 && (await _usuarioRepository.GetUsuarioByUserName(username)) != null)
@@ -74,8 +77,9 @@ namespace Animes.Application.Services
                     UserName = username
                 };
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.LogError(ex, "Erro ao criar o registro de {Entity} com os dados: {Data}.", "Usuario", createUserRequest);
                 throw;
             }
         }
@@ -93,8 +97,9 @@ namespace Animes.Application.Services
                     UserName = user.UserName
                 };
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.LogError(ex, "Erro ao buscar o registro de {Entity} com o UserName: {UserName}.", "Usuário", username);
                 throw;
             }
         }

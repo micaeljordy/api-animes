@@ -5,6 +5,7 @@ using Animes.Application.Configurations;
 using Animes.Application.DTOs.Requests;
 using Animes.Application.Interfaces;
 using Animes.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Animes.Application.Services
@@ -14,11 +15,13 @@ namespace Animes.Application.Services
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IEncryptionService _encryptionService;
         private readonly JwtSettings _jwtSettings;
-        public AuthService(IUsuarioRepository usuarioRepository, IEncryptionService encryptionService, JwtSettings jwtSettings)
+        private readonly ILogger<AuthService> _logger;
+        public AuthService(IUsuarioRepository usuarioRepository, IEncryptionService encryptionService, JwtSettings jwtSettings, ILogger<AuthService> logger)
         {
             _usuarioRepository = usuarioRepository;
             _encryptionService = encryptionService;
             _jwtSettings = jwtSettings;
+            _logger = logger;
         }
         public async Task<string?> Login(LoginRequest loginRequest)
         {
@@ -48,8 +51,9 @@ namespace Animes.Application.Services
                 }
                 return null;
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.LogError(ex, "Erro ao criar o token do Usuario: {UserName}.", loginRequest.UserName);
                 throw;
             }
         }
