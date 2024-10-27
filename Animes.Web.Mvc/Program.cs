@@ -1,5 +1,10 @@
+using System.Text;
+using Animes.Application.Configurations;
+using Animes.Application.Exceptions;
 using Animes.Infra.Data.Context;
 using Animes.Infrastructure.IoC;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,10 +19,29 @@ DependencyContainer.RegisterServices(builder.Services);
 
 // Adicione controladores
 builder.Services.AddControllers();
+var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
+var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
+if(jwtSettings == null)
+{
+    throw new ConfigurationException("JwtSettings ausente");
+}
+builder.Services.Configure<JwtSettings>(jwtSettingsSection);
+var key = Encoding.ASCII.GetBytes(jwtSettings.SecretKey);
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
 
 // Configurar Swagger
-builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Animes API", Version = "v1" });
@@ -42,6 +66,8 @@ else
 app.UseHttpsRedirection();
 
 app.UseRouting();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

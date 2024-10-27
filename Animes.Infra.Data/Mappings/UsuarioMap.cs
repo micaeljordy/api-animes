@@ -18,6 +18,8 @@ namespace Animes.Infra.Data.Mappings
             builder.Property(p=>p.UserName)
             .IsRequired()
             .HasMaxLength(50);
+            builder.HasIndex(p=>p.UserName)
+            .IsUnique();
         }
     }
 }
