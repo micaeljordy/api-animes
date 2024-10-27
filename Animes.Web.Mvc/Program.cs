@@ -17,18 +17,22 @@ builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 DependencyContainer.RegisterServices(builder.Services);
-
-// Adicione controladores
 builder.Services.AddControllers();
+// Configuração do JwtSettings
 var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
+builder.Services.Configure<JwtSettings>(jwtSettingsSection); // Necessário para a injeção
 var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
-if(jwtSettings == null)
+if (jwtSettings == null || string.IsNullOrEmpty(jwtSettings.SecretKey))
 {
-    throw new ConfigurationException("JwtSettings ausente");
+    throw new ConfigurationException("Configuração JwtSettings ausente ou inválida");
 }
-//builder.Services.Configure<JwtSettings>(jwtSettingsSection);
+
 // Alternativamente, adicione diretamente como singleton para ser injetado em serviços
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
+
+// Adicione o serviço de autorização
+builder.Services.AddAuthorization();
+
 var key = Encoding.ASCII.GetBytes(jwtSettings.SecretKey);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

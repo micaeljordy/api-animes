@@ -38,11 +38,13 @@ namespace Animes.Application.Services
                             new Claim(ClaimTypes.Name, loginRequest.UserName)
                         }),
                         Expires = DateTime.UtcNow.AddHours(_jwtSettings.Expires),
+                        Issuer = _jwtSettings.Issuer,
+                        Audience = _jwtSettings.Audience,
                         SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                     };
                     var token = tokenHandler.CreateToken(tokenDescriptor);
 
-                    return tokenHandler.WriteToken(token);
+                    return "Bearer " + tokenHandler.WriteToken(token);
                 }
                 return null;
             }
