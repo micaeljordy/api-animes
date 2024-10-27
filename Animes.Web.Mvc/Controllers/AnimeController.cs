@@ -10,11 +10,11 @@ namespace Animes.Web.Mvc.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class AnimesController : ControllerBase
+    public class AnimeController : ControllerBase
     {
         private readonly IAnimeService _animeService;
 
-        public AnimesController(IAnimeService animeService)
+        public AnimeController(IAnimeService animeService)
         {
             _animeService = animeService;
         }

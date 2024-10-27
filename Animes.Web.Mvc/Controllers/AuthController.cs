@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Animes.Web.Mvc.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class AuthsController : ControllerBase
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public AuthsController(IAuthService authService)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
         }

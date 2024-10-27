@@ -12,6 +12,7 @@ namespace Animes.Application.Services
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IEncryptionService _encryptionService;
+        private static readonly Random random = new Random();
         public UsuarioService(IUsuarioRepository usuarioRepository, IEncryptionService encryptionService)
         {
             _usuarioRepository = usuarioRepository;
@@ -19,10 +20,9 @@ namespace Animes.Application.Services
         }
         private string GenerateRandomString()
         {
-            int length = new Random().Next(1, 10);
+            int length = random.Next(1, 10);
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             StringBuilder stringBuilder = new StringBuilder();
-            Random random = new Random();
 
             for (int i = 0; i < length; i++)
             {
@@ -37,22 +37,29 @@ namespace Animes.Application.Services
             try
             {
                 var nomesSplit = createUserRequest.Nome
-                                .ToLower()
-                                .Trim()
-                                .Split(" ");
-                while(nomesSplit.Length < 2)
+                        .ToLower()
+                        .Trim()
+                        .Split(" ")
+                        .ToList();
+                while (nomesSplit.Count < 2)
                 {
-                    nomesSplit.Append(GenerateRandomString());
+                    nomesSplit.Add(GenerateRandomString());
                 }
-                if(nomesSplit.First().Length > 48)
+                if (nomesSplit.First().Length > 48)
                 {
                     throw new BusinessRulesException("Não é possível criar um UserName válido, tente cadastrar outro Nome.");
                 }
                 var username = nomesSplit.First() + '.' + nomesSplit.Last();
-                while(username.Length > 50 && (await _usuarioRepository.GetUsuarioByUserName(username)) != null)
+                while (username.Length > 50 && (await _usuarioRepository.GetUsuarioByUserName(username)) != null)
                 {
                     nomesSplit.Append(GenerateRandomString());
                     username = nomesSplit.First() + '.' + nomesSplit.Last();
+
+                    // Adicione uma condição de saída para evitar um loop infinito
+                    if (nomesSplit.Count > 100) // Limite de tentativas
+                    {
+                        throw new BusinessRulesException("Não foi possível gerar um UserName único.");
+                    }
                 }
 
                 await _usuarioRepository.CreateUsuario(new Usuario
