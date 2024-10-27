@@ -3,6 +3,7 @@ using Animes.Application.DTOs.Responses;
 using Animes.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Animes.Web.Mvc.Controllers
 {
@@ -19,6 +20,10 @@ namespace Animes.Web.Mvc.Controllers
             _usuarioService = usuarioService;
         }
         [HttpGet("{userName}")]
+        [SwaggerOperation(Summary = "Recupera um usuário por UserName", Description = "Retorna o usuário com o UserName especificado")]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(CreateUserResponse))]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [Produces("application/json")]
         public async Task<ActionResult<CreateUserResponse>> GetByUserName(string userName)
         {
             _logger.LogInformation("Buscando o registro de {Entity} com o UserName: {UserName}.", "Usuario", userName);
@@ -33,6 +38,10 @@ namespace Animes.Web.Mvc.Controllers
         }
         [HttpPost]
         [AllowAnonymous]
+        [SwaggerOperation(Summary = "Cria um novo usuário")]
+        [SwaggerResponse(StatusCodes.Status201Created, Type = typeof(CreateUserResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [Produces("application/json")]
         public async Task<ActionResult<CreateUserResponse>> CreateUsuario([FromBody]CreateUserRequest createUserRequest)
         {
             _logger.LogInformation("Iniciando a criação do novo registro de {Entity} com os dados: {Data}.", "Usuario", createUserRequest); 

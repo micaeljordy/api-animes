@@ -1,6 +1,7 @@
 using Animes.Application.DTOs.Requests;
 using Animes.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Animes.Web.Mvc.Controllers
 {
@@ -17,6 +18,11 @@ namespace Animes.Web.Mvc.Controllers
         }
 
         [HttpPost]
+        [SwaggerOperation(Summary = "Cria um novo token")]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(string))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized)]
+        [Produces("text/plain")]
         public async Task<ActionResult<string>> Login(LoginRequest loginRequest)
         {
             _logger.LogInformation("Iniciando a criação do novo Token do Usuario {UserName}.", loginRequest.UserName);
@@ -24,7 +30,7 @@ namespace Animes.Web.Mvc.Controllers
             if(token != null)
             {
                 _logger.LogInformation("Token criado com sucesso. UserName: {UserName}.", loginRequest.UserName);
-                return token;
+                return Ok(token);
             }
             _logger.LogWarning("Falha ao criar Token do Usuario {UserName}", loginRequest.UserName);
             return Unauthorized();

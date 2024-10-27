@@ -5,6 +5,7 @@ using Animes.Application.Interfaces;
 using Animes.Application.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Animes.Web.Mvc.Controllers
 {
@@ -21,7 +22,11 @@ namespace Animes.Web.Mvc.Controllers
             _animeService = animeService;
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<AnimeResponseDTO>> GetAnime(int id)
+        [SwaggerOperation(Summary = "Recupera um anime por ID", Description = "Retorna o anime com o ID especificado")]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(AnimeResponseDTO))]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [Produces("application/json")]
+        public async Task<ActionResult<AnimeResponseDTO>> GetAnime([FromRoute] int id)
         {
             _logger.LogInformation("Buscando o registro de {Entity} com o ID: {Id}.", "Anime", id);
             var result = await _animeService.GetAnime(id);
@@ -34,6 +39,10 @@ namespace Animes.Web.Mvc.Controllers
             return Ok(result);
         }
         [HttpGet]
+        [SwaggerOperation(Summary = "Recupera uma lista de animes filtrados por parâmetros passados na query", Description = "Retorna uma lista de animes que correspondem aos filtros")]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(AnimeViewModel))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [Produces("application/json")]
         public async Task<ActionResult<AnimeViewModel>> GetAnimes(
             [FromQuery] int? index,
             [FromQuery] int? take,
@@ -63,6 +72,10 @@ namespace Animes.Web.Mvc.Controllers
             return Ok(result);
         }
         [HttpPost]
+        [SwaggerOperation(Summary = "Cria um novo anime")]
+        [SwaggerResponse(StatusCodes.Status201Created, Type = typeof(AnimeResponseDTO))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [Produces("application/json")]
         public async Task<ActionResult<AnimeResponseDTO>> CreateAnime([FromBody] CreateAnimeRequest createAnimeRequest)
         {
             _logger.LogInformation("Iniciando a criação do novo registro de {Entity} com os dados: {Data}.", "Anime", createAnimeRequest);
@@ -70,8 +83,14 @@ namespace Animes.Web.Mvc.Controllers
             _logger.LogInformation("Registro de {Entity} criado com sucesso. ID: {Id}.", "Anime", result.Id);
             return CreatedAtAction(nameof(GetAnime), new { Id = result.Id }, result);
         }
+
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateAnime(int id, [FromBody] UpdateAnimeRequest updateAnimeRequest)
+        [SwaggerOperation(Summary = "Atualiza os dados de um anime")]
+        [SwaggerResponse(StatusCodes.Status204NoContent)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [Produces("application/json")]
+        public async Task<ActionResult> UpdateAnime([FromRoute]int id, [FromBody] UpdateAnimeRequest updateAnimeRequest)
         {
             _logger.LogInformation("Iniciando a atualização do registro de {Entity} com o ID: {Id}. Dados novos: {NewData}.", "Anime", id, updateAnimeRequest);
             var success = await _animeService.UpdateAnime(id, updateAnimeRequest);
@@ -84,7 +103,11 @@ namespace Animes.Web.Mvc.Controllers
             return NoContent();
         }
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteAnime(int id)
+        [SwaggerOperation(Summary = "Deleta um anime")]
+        [SwaggerResponse(StatusCodes.Status204NoContent)]
+        [SwaggerResponse(StatusCodes.Status404NotFound)]
+        [Produces("application/json")]
+        public async Task<ActionResult> DeleteAnime([FromRoute]int id)
         {
             _logger.LogInformation("Iniciando a exclusão do registro de {Entity} com o ID: {Id}.", "Anime", id);
             var success = await _animeService.DeleteAnime(id);
